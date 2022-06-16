@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-71156606-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-71156606-1');
+  </script>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>[SNET] Unsupervised QA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <link rel="stylesheet" type="text/css" href="assets/styles/all.css" />
+  <script type="text/javascript">document.documentElement.className = 'js';</script>
+  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+  <link rel="mask-icon" href="assets/images/mask-icon.svg" color="#000000">
+  <link rel="icon" href="content/images/size/w256h256/2020/09/icon-1.png" type="image/png" />
+    <!-- <link rel="canonical" href="https://openai.com/blog/formal-math/" /> -->
+    <meta name="referrer" content="no-referrer-when-downgrade" />
+    <!-- <meta property="og:site_name" content="OpenAI" /> -->
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Unsupervised Context-Driven QA" />
+    <!-- <meta property="og:description" content="We built a neural theorem prover for Lean [https://leanprover.github.io/] that
+learned to solve a variety of challenging high-school olympiad problems,
+including problems from the AMC12
+[https://www.maa.org/math-competitions/amc-1012] and AIME
+[https://www.maa.org/math-competitions/invitational-competitions] competitions,
+as well as two problems adapted from" /> -->
+  
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "publisher": {
+        "@type": "Organization",
+        "name": "OpenAI",
+        "url": "https://openai.com/",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "content/images/2022/05/openai-avatar.png",
+            "width": 60,
+            "height": 60
+        }
+    },
+    "author": {
+        "@type": "Person",
+        "name": "Stanislas Polu",
+        "url": "https://openai.com/blog/authors/stanislas/",
+        "sameAs": []
+    },
+    "headline": "Solving (Some) Formal Math Olympiad Problems",
+    "url": "https://openai.com/blog/formal-math/",
+    "datePublished": "2022-02-02T18:01:48.000Z",
+    "dateModified": "2022-02-07T17:00:14.000Z",
+    "keywords": "Research",
+    "description": "We built a neural theorem prover for Lean [https://leanprover.github.io/] that\nlearned to solve a variety of challenging high-school olympiad problems,\nincluding problems from the AMC12\n[https://www.maa.org/math-competitions/amc-1012] and AIME\n[https://www.maa.org/math-competitions/invitational-competitions] competitions,\nas well as two problems adapted from the IMO [https://www.imo-official.org/].[1] \nThe prover uses a language model to find proofs of formal statements. Each time\nwe find a new ",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://openai.com/"
+    }
+}
+    </script>
+    <meta name="generator" content="Ghost 5.2" />
+    <link rel="alternate" type="application/rss+xml" title="OpenAI" href="https://openai.com/blog/rss/" />
+    <script defer src="_tryghost/portal__2.2.0/umd/portal.min.js" data-ghost="https://openai.com/" data-key="23f7e2ddba37b787ce1ea90e77" data-api="https://openaidev.ghost.io/ghost/api/content/" ></script><style id="gh-members-styles">.gh-post-upgrade-cta-content,
+.gh-post-upgrade-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-align: center;
+    width: 100%;
+    color: #ffffff;
+    font-size: 16px;
+}
+.gh-post-upgrade-cta-content {
+    border-radius: 8px;
+    padding: 40px 4vw;
+}
+.gh-post-upgrade-cta h2 {
+    color: #ffffff;
+    font-size: 28px;
+    letter-spacing: -0.2px;
+    margin: 0;
+    padding: 0;
+}
+.gh-post-upgrade-cta p {
+    margin: 20px 0 0;
+    padding: 0;
+}
+.gh-post-upgrade-cta small {
+    font-size: 16px;
+    letter-spacing: -0.2px;
+}
+.gh-post-upgrade-cta a {
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: 500;
+    box-shadow: none;
+    text-decoration: underline;
+}
+.gh-post-upgrade-cta a:hover {
+    color: #ffffff;
+    opacity: 0.8;
+    box-shadow: none;
+    text-decoration: underline;
+}
+.gh-post-upgrade-cta a.gh-btn {
+    display: block;
+    background: #ffffff;
+    text-decoration: none;
+    margin: 28px 0 0;
+    padding: 8px 18px;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 600;
+}
+.gh-post-upgrade-cta a.gh-btn:hover {
+    opacity: 0.92;
+}</style>
+    <script defer src="public/cards.min.js"></script><style>:root {--ghost-accent-color: #15171A;}</style>
+    <link rel="stylesheet" type="text/css" href="public/cards.min.css">
+</head>
+<body>
+<article class="post" id="post-formal-math">
+  <header
+  class="post-header"
+  >
+  <!-- <nav class="nav container" data-url="/blog/formal-math/">
+  <div class="nav-row row align-items-center">
+    <div class="d-none d-sm-block col-sm nav-symbol-wrap">
+      <a href="index.html" class="nav-symbol"><svg id="openai-symbol" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 51 51"><path d="M47.21,20.92a12.65,12.65,0,0,0-1.09-10.38A12.78,12.78,0,0,0,32.36,4.41,12.82,12.82,0,0,0,10.64,9a12.65,12.65,0,0,0-8.45,6.13,12.78,12.78,0,0,0,1.57,15A12.64,12.64,0,0,0,4.84,40.51a12.79,12.79,0,0,0,13.77,6.13,12.65,12.65,0,0,0,9.53,4.25A12.8,12.8,0,0,0,40.34,42a12.66,12.66,0,0,0,8.45-6.13A12.8,12.8,0,0,0,47.21,20.92ZM28.14,47.57a9.46,9.46,0,0,1-6.08-2.2l.3-.17,10.1-5.83a1.68,1.68,0,0,0,.83-1.44V23.69l4.27,2.47a.15.15,0,0,1,.08.11v11.8A9.52,9.52,0,0,1,28.14,47.57ZM7.72,38.85a9.45,9.45,0,0,1-1.13-6.37l.3.18L17,38.49a1.63,1.63,0,0,0,1.65,0L31,31.37V36.3a.17.17,0,0,1-.07.13L20.7,42.33A9.51,9.51,0,0,1,7.72,38.85Zm-2.66-22a9.48,9.48,0,0,1,5-4.17v12a1.62,1.62,0,0,0,.82,1.43L23.17,33.2,18.9,35.67a.16.16,0,0,1-.15,0L8.54,29.78A9.52,9.52,0,0,1,5.06,16.8ZM40.14,25,27.81,17.84l4.26-2.46a.16.16,0,0,1,.15,0l10.21,5.9A9.5,9.5,0,0,1,41,38.41v-12A1.67,1.67,0,0,0,40.14,25Zm4.25-6.39-.3-.18L34,12.55a1.64,1.64,0,0,0-1.66,0L20,19.67V14.74a.14.14,0,0,1,.06-.13L30.27,8.72a9.51,9.51,0,0,1,14.12,9.85ZM17.67,27.35,13.4,24.89a.17.17,0,0,1-.08-.12V13a9.51,9.51,0,0,1,15.59-7.3l-.3.17-10.1,5.83a1.68,1.68,0,0,0-.83,1.44Zm2.32-5,5.5-3.17L31,22.35v6.34l-5.49,3.17L20,28.69Z"/></svg></a>
+    </div>
+    <div class="col col-sm-auto">
+      <ul class="d-flex flex-row align-items-center justify-content-between small-caps">
+        <div class="d-sm-none nav-symbol-wrap">
+          <a href="index.html" class="nav-symbol"><svg id="openai-symbol" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 51 51"><path d="M47.21,20.92a12.65,12.65,0,0,0-1.09-10.38A12.78,12.78,0,0,0,32.36,4.41,12.82,12.82,0,0,0,10.64,9a12.65,12.65,0,0,0-8.45,6.13,12.78,12.78,0,0,0,1.57,15A12.64,12.64,0,0,0,4.84,40.51a12.79,12.79,0,0,0,13.77,6.13,12.65,12.65,0,0,0,9.53,4.25A12.8,12.8,0,0,0,40.34,42a12.66,12.66,0,0,0,8.45-6.13A12.8,12.8,0,0,0,47.21,20.92ZM28.14,47.57a9.46,9.46,0,0,1-6.08-2.2l.3-.17,10.1-5.83a1.68,1.68,0,0,0,.83-1.44V23.69l4.27,2.47a.15.15,0,0,1,.08.11v11.8A9.52,9.52,0,0,1,28.14,47.57ZM7.72,38.85a9.45,9.45,0,0,1-1.13-6.37l.3.18L17,38.49a1.63,1.63,0,0,0,1.65,0L31,31.37V36.3a.17.17,0,0,1-.07.13L20.7,42.33A9.51,9.51,0,0,1,7.72,38.85Zm-2.66-22a9.48,9.48,0,0,1,5-4.17v12a1.62,1.62,0,0,0,.82,1.43L23.17,33.2,18.9,35.67a.16.16,0,0,1-.15,0L8.54,29.78A9.52,9.52,0,0,1,5.06,16.8ZM40.14,25,27.81,17.84l4.26-2.46a.16.16,0,0,1,.15,0l10.21,5.9A9.5,9.5,0,0,1,41,38.41v-12A1.67,1.67,0,0,0,40.14,25Zm4.25-6.39-.3-.18L34,12.55a1.64,1.64,0,0,0-1.66,0L20,19.67V14.74a.14.14,0,0,1,.06-.13L30.27,8.72a9.51,9.51,0,0,1,14.12,9.85ZM17.67,27.35,13.4,24.89a.17.17,0,0,1-.08-.12V13a9.51,9.51,0,0,1,15.59-7.3l-.3.17-10.1,5.83a1.68,1.68,0,0,0-.83,1.44Zm2.32-5,5.5-3.17L31,22.35v6.34l-5.49,3.17L20,28.69Z"/></svg></a>
+        </div>
+          <li class="ml-sm-1.75" style="margin-top:0.5px"><a class="nav-link " href="index.html" data-slug="api">API</a></li>
+          <li class="ml-sm-1.75" style="margin-top:0.5px"><a class="nav-link " href="index.html" data-slug="research">Research</a></li>
+          <li class="ml-sm-1.75" style="margin-top:0.5px"><a class="nav-link active-parent" href="index.html" data-slug="blog">Blog</a></li>
+          <li class="ml-sm-1.75" style="margin-top:0.5px"><a class="nav-link " href="index.html" data-slug="about">About</a></li>
+      </ul>
+    </div>
+  </div> -->
+
+  <style>
+    .underline-effect {
+  background-image: linear-gradient(120deg, #c400ad65 0%, #0092af91 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 0.25em;
+  background-position: 0 80%;
+}
+.underline-effect-2 {
+  background-image: linear-gradient(120deg, #00a3c484 0%, #0092af86 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 0.25em;
+  background-position: 0 80%;
+}
+mark {
+  background-color: rgba(255, 225, 0, 0.689);
+  /* border-radius: 10px; */
+  color: black;
+}
+  </style>
+</nav>
+          <div class="container mt-5">
+    <div class="row">
+        <div class="col-12 col-md-9 col-lg-8 col-xl-12 text-xl-center">
+          <div class="max-width-xxwide mx-xl-auto">
+            <h1 class="
+   balance-text
+   mb-0.75 mb-xl-2.25
+   
+  "><span class="underline-effect">Unsupervised Context-Driven Question Answering Based on Link Grammar</span></h1>          </div>
+        </div>
+    </div>
+      <div class="row">
+        <div class="col-12 col-md-9 col-lg-8 col-xl-6 order-xl-1">
+            <div class="post-excerpt content no-col js-excerpt-container js-widow">
+  </div>
+        </div>
+        <div class="col-12 col-md-3 col-lg-4 col-xl-3 order-xl-0">
+            <div class="post-header-date small-copy color-fg-50 mb-1.5">
+    <time datetime="2022-02-02"><span style="color: black">October 16, 2021</span></time>
+    <div class="reading-time" style="position: relative; top: 10px">Presented at the <span style="color: black">14<sup>th</sup> International<br>Conference on Artificial General<br>Intelligence (<strong><span class="underline-effect-2"><a href="https://agi-conf.org/2021/" target=_blank>AGI-21</a></span></strong>)</span></div>
+    <div class="reading-time" style="position: relative; top: 20px"><span style="color: black">Cite as: </span>
+      <pre style="width: 80%; position: relative; top:-20px"><code ><span style="color: black">Ramesh V., Kolonin A. (2022)<br>Unsupervised Context-Driven Question 
+Answering Based on Link Grammar. <br>In: Goertzel B., Iklé M., Potapov A.
+(eds) Artificial General Intelligence. 
+AGI 2021. Lecture Notes in Computer 
+Science, vol 13154. Springer, Cham. 
+[<strong><span class="underline-effect-2" ><a href="https://doi.org/10.1007/978-3-030-93758-4_22">doi</a></span></strong>]           
+</code></pre></div></div></div></div>
+ </div>
+  </div>
+</header>
+  <section class="container">
+  <div class="row">
+    <section class="content">
+      <!--kg-card-begin: markdown--><div class="js-excerpt" >
+<p> In this paper, we propose an
+  interpretable <mark>“Contextual Generator”</mark> architecture for question answering (QA),
+  built as an extension of the recently published <mark>“Generator”</mark> algorithm for sentence generation<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup>, 
+  that produces grammatically valid answers to queries structured as lists of seed words. 
+  We demonstrate the potential for this architecture to
+  perform automated, closed-domain QA by detailing results on queries from
+  <a href="https://singularitynet.io/" target=_blank>SingularityNET</a>’s “small world” <mark style="background-color: rgba(0, 225, 255, 0.689);">POC-English corpus</mark> and from the <mark style="background-color: rgba(0, 225, 255, 0.689);">Stanford
+  Question Answering Dataset</mark> (<a href="https://rajpurkar.github.io/SQuAD-explorer/explore/v2.0/dev/" target=_blank>SQuAD 2.0</a>). Overall, our work may bring a greater degree of
+  general conversational intelligence to proto-AGI NLP pipelines.
+  
+</div>
+<section class="btns" style="position: relative; top: -50px"><a href="https://link.springer.com/chapter/10.1007/978-3-030-93758-4_22" class="btn btn-dark btn-padded icon-paper">Read Paper</a> 
+  <a href="https://github.com/aigents/aigents-java-nlp" class="btn btn-dark btn-padded icon-code">View Code</a></section>
+<hr style="position: relative; top: -50px">
+<p style="position: relative; top: -50px">We achieved a new state-of-the-art (41.2% vs 29.3%) on the <a href="https://arxiv.org/abs/2109.00110">miniF2F</a> benchmark, a challenging collection of high-school olympiad problems. Our approach, which we call <em>statement curriculum learning</em>, consists of manually collecting a set of statements of varying difficulty levels (without proof) where the hardest statements are similar to the benchmark we target. Initially our neural prover is weak and can only prove a few of them. We iteratively search for new proofs and re-train our neural network on the newly discovered proofs, and after 8 iterations, our prover ends up being vastly superior when tested on miniF2F.</p>
+<p style="position: relative; top: -50px">Formal mathematics is an exciting domain to study because of (i) its richness, letting you prove arbitrary theorems which require reasoning, creativity and insight and (ii) its similarity to games—where AI has been spectacularly successful—in that it has an automated way of determining whether a proof is successful (i.e., verified by the formal system). As demonstrated in the trivial example below, proving a formal statement requires generating a sequence of proof steps, each proof step consisting in a call to a tactic.<sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup> These tactics take mathematical terms as arguments and each tactic call will transform the current statement to prove, into statements that are easier to prove, until nothing is left to prove.</p>
+<div style="position: relative; top: -50px" class="proof color-fg font-sans-serif rounded p-0.75 p-md-1" data-id="0">
+<div class="informal-statement medium-small-copy"><div class="small-caps mb-0.5">Algorithm 1: Connects()</div>
+<!-- <div class="note">Adapted from AMC12 2000 Problem 5</div> -->
+<span class="underline-effect-2"><strong>Global Variables:</strong></span> <code>dict</code> <code>(<span class="theorem">Dictionary</span>)</code>, the complete LG dictionary;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>hyphenated</code> <code>(<span class="theorem">Dictionary</span>)</code>, the dictionary of hyphenated
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;terms (e.g., "son-in-law")
+<br>
+<span style="position: relative; top:10px" ><span class="underline-effect-2"><strong>Input:</strong></span> A pair of strings $\{left, right\}$ representing the two tokens to potentially be connected</span>
+<br>
+<span style="position: relative; top:20px" ><span class="underline-effect-2"><strong>Output:</strong></span> A boolean indicating whether $left$ and $right$ can be connected via valid LG rules</span>
+</div><!-- end informal statement  -->
+<br>
+<div class="formal" id="formal-0">
+<pre><code><span class="keyword">obtain</span> <span class="model">leftList</span>, the list of rules corresponding with <span class="model">left</span> 
+  (i.e., the rule when <span class="model">left</span> is a verb, the rule when <span class="model">left</span> is 
+  a gerund, etc.) from <span class="model">dict</span> and <span class="model">hyphenated</span>    
+
+<span class="keyword">obtain</span> <span class="model">rightList</span> in a similar manner
+  
+
+<span class="keyword">for</span> <span class="model">leftRule</span> <span class="keyword">in</span> <span class="model">leftList</span>:
+  <span class="keyword">for</span> <span class="model">rightRule</span> <span class="keyword">in</span> <span class="model">rightList</span>:
+    <span class="keyword">split</span> <span class="model">leftRule</span> and <span class="model">rightRule</span> into lists of <span class="theorem">Disjuncts</span> <span class="model">ld</span>, <span class="model">rd</span>
+    <span class="keyword">for</span> <span class="model">l</span> <span class="keyword">in</span> <span class="model">ld</span>:
+      <span class="keyword">for</span> <span class="model">r</span> <span class="keyword">in</span> <span class="model">rd</span>:
+        <span class="keyword">swap</span> all instances of <span style="color:rgba(0, 225, 255, 0.689)">'-'</span> and <span style="color:rgba(0, 225, 255, 0.689)">'+'</span> in <span class="model">l</span> 
+        <span class="keyword">if</span> <span class="model">l</span> <span class="keyword">==</span> <span class="model">r</span>:
+          <span class="keyword">return</span> <strong><span style="color:rgba(0, 225, 255, 0.689)">True</span></strong>
+
+<span class="keyword">return</span> <strong><span style="color:rgba(0, 225, 255, 0.689)">False</span></strong>
+</code></pre>
+</div><!-- end formal -->
+</div>
+<p style="position: relative; top: -50px">We observe that the capability to generate original mathematical terms required as arguments of tactics, which cannot be done without a neural language model, emerges from our training procedure. The proof below is an example of it: the proof step <code>use n + 1</code> (entirely generated by our models) proposes to use <code>n + 1</code> as a solution, the rest of the formal proof relying on the <a href="https://leanprover-community.github.io/mathlib_docs/tactic/ring_exp.html"><code>ring_exp</code></a> tactic to verify that it is indeed valid.</p>
+<div style="position: relative; top: -50px" class="proof color-fg font-sans-serif rounded p-0.75 p-md-1" data-id="1">
+<div class="informal-statement medium-small-copy"><div class="small-caps mb-0.5">Equation 1: Zipfian Frequency</div>
+<!-- <div class="note">Adapted from AMC12B 2020 Problem 6</div> -->
+The Zipfian frequency $Z_w$ is given by:<br><br><span style="font-size: x-large"><center>$Z_w = \frac{\log(1+F_X(w))}{\log(1+F_C(w))},$</center></span>
+<br>
+where $w$ is the given word, $F_X(w)$ is the frequency of $w$ in the context document, and $F_C(w)$ is the frequency of $w$ in the corpus.
+</div><!-- end informal statement  -->
+</div><!-- end proof -->
+<p style="position: relative; top: -50px">We also observe that our models and search procedure are capable of producing proofs that chain multiple non-trivial reasoning steps. In the proof below, the model starts by using contraposition leading to the existential statement (<code>∃ (x : ℝ), f x ≠ a * x + b</code>). It then generates a witness for it with <code>use (0 : ℝ)</code> and finishes the proof by leveraging the <a href="https://leanprover-community.github.io/mathlib_docs/tactics.html#norm_num"><code>norm_num</code></a> tactic.</p>
+<div style="position: relative; top: -50px" class="proof color-fg font-sans-serif rounded p-0.75 p-md-1" data-id="2">
+<div class="informal-statement medium-small-copy"><div class="small-caps mb-0.5">Problem 3</div>
+<p><span class="note">Adapted from the MATH dataset<sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup></span><br>
+Let $f(x) = Ax + B$ and $g(x) = Bx + A$, where $A \ne B$. If $f(g(x)) - g(f(x)) = B - A$, prove that $A + B = 0$.</p>
+</div><!-- end informal statement  -->
+<div class="clearfix mt-1.25 mb-0.75"><div class="switch" style="max-width:20rem">
+  <input type="radio" class="switch-input" name="switch-2" value="formal-2-switch" id="formal-2-switch" onclick="toggle(['blog/formal-math/formal-2.html'], ['blog/formal-math/informal-2.html'])" checked>
+  <label for="formal-2-switch" class="switch-label switch-label-off small-caps position-relative"><span class="icon position-absolute" style="top:-0.02em;transform:translateX(-100%)">code</span>&nbsp;Formal</label>
+  <input type="radio" class="switch-input" name="switch-2" value="informal-2-switch" id="informal-2-switch" onclick="toggle(['blog/formal-math/informal-2.html'], ['blog/formal-math/formal-2.html'])">
+  <label for="informal-2-switch" class="switch-label switch-label-on small-caps">Informal</label>
+  <span class="switch-selection"></span>
+</div></div>
+<div class="formal" id="formal-2">
+<pre><code><span class="keyword">theorem</span> <span class="theorem">mathd_train_algebra_217</span>
+  (a b : ℝ)
+  (f g : ℝ → ℝ)
+  (h₀ : ∀ x, f x = a * x + b)
+  (h₁ : ∀ x, f x = b * x + a)
+  (h₂ : a ≠ b)
+  (h₃ : ∀ x, f (g x) - g (f x) = b - a) :
+  a + b = 0 :=
+<span class="keyword">begin</span>
+  <span class="model">revert h₀ h₁ h₂ h₃,</span>
+  <span class="comment">-- Initial contraposition.</span>
+  <span class="model"><span class="highlight">contrapose!,</span></span>
+  <span class="model">rintro ⟨h₀, ⟨h₁, h₂⟩⟩,</span>
+  <span class="comment">-- The model proposes `0` as witness for the current</span>
+  <span class="comment">-- goal that consists in `∃ (x : ℝ), f x ≠ a * x + b`.</span>
+  <span class="model"><span class="highlight">use (0 : ℝ),</span></span>
+  <span class="model">simp only [sub_eq_iff_eq_add, h₀, mul_zero, zero_add],</span>
+  <span class="model">norm_num at h₀,</span>
+<span class="keyword">end</span>
+</code></pre>
+</div><!-- end formal -->
+<div class="informal medium-small-copy" id="informal-2" style="display:none">
+<p>First we find that:</p>
+<p>$$f(g(x)) = A(Bx + A) + B = ABx + A^2 + B$$$$g(f(x)) = B(Ax + B) + A = ABx + B^2 + A$$</p>
+<p>Now we plug this back in $f(g(x)) - g(f(x)) = B - A$ and get:</p>
+<p>$$(ABx + A^2 + B) - (ABx + B^2 + A) = B - A$$</p>
+<p>That is:</p>
+<p>$$A^2 - B^2 + B - A = B - A$$</p>
+<p>Hence:</p>
+<p>$$A^2 - B^2 = (A-B)(A+B) = 0$$</p>
+<p>Since we are given that $A \ne B$, necessarily, $A + B = 0$.</p>
+</div><!-- end informal -->
+</div><!-- end proof -->
+<p style="position: relative; top: -50px">Formal mathematics involves two main challenges that make a naive application of reinforcement learning unlikely to succeed.</p>
+<ul style="position: relative; top: -50px">
+<li>(i) <strong>Infinite action space</strong>: not only does formal mathematics have an extremely large search space (like Go for example), it also has an infinite action space. At each step of a proof search, the model must choose not from a well-behaved finite set of actions, but a complex and infinite set of tactics, involving exogenous mathematical terms that have to be generated (e.g., generating a mathematical statement to be used as a witness, an object used in steps such as &quot;there exists an $x$ s.t. …&quot;, or a cut, the introduction and the chaining of a lemma in the middle of a proof).</li>
+<li>(ii) <strong>Lack of self-play</strong>: conversely to 2-player games, a prover is not playing against an opponent but against a set of statements to prove. When faced with a statement that is just too hard, there is no obvious reframing that will let the prover generate intermediary easier statements to tackle first. This asymmetry prevents naive application of the self-play algorithms that were successful with 2-player games.</li>
+</ul>
+<p style="position: relative; top: -50px">In our work, we address the infinite action space problem by sampling actions from a language model as we search for a proof. Language models have the capability to generate the tactic calls as well as the original mathematical terms often required as arguments. Our basis for addressing the lack of self-play is the observation that the key role of self-play in 2-player games is to provide an unsupervised curriculum. Our methodology proposes to replace this unsupervised curriculum with an auxiliary set of problem statements (without requiring proofs) of varying difficulty. We empirically show that, when the difficulty of these auxiliary problems is varied enough, our training procedure is able to solve a curriculum of increasingly difficult problems, eventually generalizing to the set of problems we care about.</p>
+<p style="position: relative; top: -50px">While these results are extremely exciting, as they demonstrate that deep learning models are capable of non-trivial mathematical reasoning when interacting with a formal system, we are still very far from best-student performance on these competitions, only occasionally, rather than consistently, closing challenging olympiad problems. We hope nonetheless that our work will motivate research in this domain, in particular towards the <a href="https://imo-grand-challenge.github.io/">IMO Grand Challenge</a> and that the <em>statement curriculum learning</em> methodology we propose will help accelerate progress in automated reasoning in general.</p>
+<style>
+:root {
+  --proof-green: #00A67D; /* green */
+  --proof-medium-blue: #0082D0; /* medium-blue */
+  --proof-red: #F22C3D; /* red */
+  --proof-golden: #EA9100; /* golden */
+}
+.proof {
+  background-color: #0E0E1A;
+  --fg: 247,247,247;
+  margin-top: calc(var(--v) * 1.5);
+  margin-bottom: calc(var(--v) * 1.5);
+}
+.proof .note {
+  color: rgba(var(--fg), 0.5);
+  font-style: italic;
+}
+.proof .theorem {
+  color: var(--proof-red);
+  font-weight: bold;
+}
+.proof .keyword {
+  color: var(--proof-green);
+}
+.proof .comment {
+  color: rgba(var(--fg), 0.5);
+  font-style: italic;
+}
+.proof .model {
+  color: var(--proof-golden);
+}
+.proof .highlight {
+  font-weight: bold;
+  background-color: rgba(var(--fg), 0.05);
+}
+.proof + .proof {
+  margin-top: calc(var(--v) * -0.5);
+}
+.proof pre {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.informal p {
+  margin-bottom: 0;
+}
+</style>
+<script>
+var toggle = function (whichIds, otherIds) {
+  for (var i = 0; i < whichIds.length; i++) {
+    var whichId = whichIds[i];
+    var whichEl = document.getElementById(whichId);
+    if (!whichEl) return;
+    whichEl.style.display = 'block';
+  }
+  for (var i = 0; i < otherIds.length; i++) {
+    var otherId = otherIds[i];
+    var otherEl = document.getElementById(otherId);
+    if (!otherEl) return;
+    otherEl.style.display = 'none';
+  }
+};
+</script>
+<footer class="post-footer js-post-footer">
+<!-- footer item -->
+<div><hr><div class="row" id="acknowledgments">
+<div class="col">Acknowledgments</div>
+<div class="col">
+<p>Thanks to our colleagues at SingularityNET and OpenCog, Ben Goertzel and Linas Vepstas, for their support and thoughtful feedback since the beginning of the Interpretable Natural Language Processing (INLP) initiative.</p>
+<p>Thanks to Andres Suarez for his help with training and testing data collection.</p>
+</div>
+</div></div>
+<!-- special footer item for footnotes -->
+<div data-order="-2"><hr><div class="row" id="footnotes">
+<div class="col">Footnotes</div>
+<div class="col">
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p>We published <span style="color: black">&ldquo;Loader-Generator&rdquo;</span>, a state-of-the-art model architecture for generating grammatically valid sentences using the
+  <span style="color: black"><span class="underline-effect-2"><a style="text-decoration: none" href="https://www.link.cs.cmu.edu/link/" target=_blank>Link Grammar</a></span></span> database, on <span class="underline-effect-2" style="color: black"><a href="https://arxiv.org/abs/2105.00830" target="_blank">arXiv</a></span> in April 2021. <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn2" class="footnote-item"><p>The artifacts accepted by the formal system are low-level (like assembly code) and hard for humans to produce. Tactics are search procedures that generate such artifacts from higher level directives to assist formalization. <a href="#fnref2" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn3" class="footnote-item"><p>Addendum: It was reported to us that this formal statement has an error (it should be <code>g</code> instead of <code>f</code> in <code>h₁</code>). While this error unfortunately makes the statement significantly easier than its informal version, it's an interesting example of the challenges associated with formalizing problem statements: although Lean can verify with 100% confidence that a formal proof is a correct proof of a formal statement, there is no way to automatically verify that a formal statement is &quot;faithful&quot; to an informal one. The proof of the simplified statement remains interesting so we decided to keep it in the blog post and be explicit about it with this footnote. <a href="#fnref3" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn4" class="footnote-item"><p>This proof is not reported in the paper as it was found by a more recent model we are still experimenting with. We decided to share it nonetheless because it's one of our favourite. <a href="#fnref4" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>
+<!--kg-card-end: markdown-->
+    </section>
+  </div>
+</section>
+  <footer class="post-footer post-footer--authors container js-post-footer-authors">
+  <div data-order="0">
+    <hr>
+    <div class="row" id="authors">
+      <div class="col">Authors</div>
+      <div class="col js-post-footer-authors-list ">
+        <span class="post-author"><a class="fade" href="https://vignavramesh.me">Vignav Ramesh</a></span><span class="post-author"><a class="fade" href="https://aigents.com">Anton Kolonin</a></span></span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</article>
+
+  <script type="text/javascript" src="assets/scripts/main.js"></script>
+  <br>
+<center><font size="2"></font></center></body>
+</html>
